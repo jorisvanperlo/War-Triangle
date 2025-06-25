@@ -1,59 +1,71 @@
 ﻿using UnityEngine;
 using TMPro;
-using UnityEngine.Windows;
+using NaughtyAttributes;
 
 public class Flightcontroller : MonoBehaviour
 {
     // General info and input
-    private Rigidbody rb;
+    [Foldout("GeneralStats")]
     public float mass_Kg;
-    public float throttleIncrement = 0.1f;
-    public float enginePower_Hp = 200f;
-    public float rollResponsiveness, pitchResponsiveness, yawResponsiveness;
-    public float liftMultiplier = 1.0f;
-    private float roll, pitch, yaw;
+    [Foldout("GeneralStats")]
+    public float liftMultiplier = 100f;
+
+    private Rigidbody rb;
 
     // Controll Surfaces
+    [Foldout("Control Surfaces")]
     public GameObject[] elevators, rudder;
+    [Foldout("Control Surfaces")]
     public GameObject aileronL, aileronR;
-    public float controlSurfRotSpeed;
-    public float aileronMaxRot, elevatorMaxRot, rudderMaxRot;
+    [Foldout("Control Surfaces")]
+    public float aileronMaxRot, elevatorMaxRot, rudderMaxRot, controlSurfRotSpeed;
+    [Foldout("Control Surfaces")]
+    public float rollResponsiveness, pitchResponsiveness, yawResponsiveness;
+
     private float currentAileronAngle, currentElevatorAngle, currentRudderAngle;
+    private float roll, pitch, yaw;
 
     // Flaps
+    [Foldout("Flaps")]
     public GameObject[] flaps;
+    [Foldout("Flaps")]
     public float flapDeploySpeed;
+    [Foldout("Flaps")]
     public Vector3 flapDeployAngle, flapFoldedAngle;
 
     // Engine Force
-    private float throttle;
-    private float currentThrust = 0f;
-    public float accelerationRate = 1f;
-    public float decelerationRate = 1f; 
+    [Foldout("Engine")]
+    public float accelerationRate = 2f, decelerationRate = 2f;
+    [Foldout("Engine")]
+    public float throttleIncrement = 30f, enginePower_Hp = 200f;
 
     private float thrustForce;
+    private float throttle;
+    private float currentThrust = 0f;
 
     // Aerodynamics
+    [Foldout("Drag")]
     public float dragOverSpeedMod = 0.0005f;
+
     private float drag;
     private float lowSpeedAccelDamp;
     private float lowSpeedAccelDampMod = 0.01f;
 
-
     // Proplers
+    [Foldout("Propelor")]
+    public GameObject[] propHolders, proplers, fakeProplers;
+    [Foldout("Propelor")]
+    public float propSpinSpeed = 13;
+    [Foldout("Propelor")]
+    public float propSwapThreshold_Perc = 20f;
+
+    private float currentSpinSpeed = 0f;
     private bool propState;
-    public GameObject[] propHolders;
-    public GameObject[] proplers;
-    public GameObject[] fakeProplers;
     private bool previousPropState;
 
-    public float propSpinSpeed = 13;
-    private float currentSpinSpeed = 0f;
-    public float fakePropThreshold = 0.2f;
-
     // UI
-    public TextMeshProUGUI throttleInd;
-    public TextMeshProUGUI AirspeedInd;
+    [Foldout("UI")]
+    public TextMeshProUGUI throttleInd, AirspeedInd;
     public void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -157,7 +169,7 @@ public class Flightcontroller : MonoBehaviour
     public void RotatePropellors()
     {
         // Proplers 
-        if (throttle >= 100f * fakePropThreshold)
+        if (throttle >= propSwapThreshold_Perc)
         {
             propState = true;
         }

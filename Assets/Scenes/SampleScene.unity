@@ -10630,26 +10630,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mass_Kg: 4800
-  throttleIncrement: 100
-  enginePower_Hp: 1460
-  rollResponsiveness: 2
-  pitchResponsiveness: 2
-  yawResponsiveness: 3.5
   liftMultiplier: 100
   elevators: []
   rudder: []
   aileronL: {fileID: 6984013612281578914}
   aileronR: {fileID: 5393462718378469988}
-  controlSurfRotSpeed: 200
   aileronMaxRot: 35
   elevatorMaxRot: 35
   rudderMaxRot: 35
+  controlSurfRotSpeed: 200
+  rollResponsiveness: 2
+  pitchResponsiveness: 2
+  yawResponsiveness: 3.5
   flaps: []
   flapDeploySpeed: 5
   flapDeployAngle: {x: 0, y: 0, z: 0}
   flapFoldedAngle: {x: 0, y: 0, z: 0}
   accelerationRate: 2
   decelerationRate: 2
+  throttleIncrement: 100
+  enginePower_Hp: 1460
   dragOverSpeedMod: 0.0005
   propHolders:
   - {fileID: 216163368}
@@ -10660,8 +10660,8 @@ MonoBehaviour:
   fakeProplers:
   - {fileID: 1092507096316188619}
   - {fileID: 1488412242}
-  maxRPM: 13
-  fakePropThreshold: 0.25
+  propSpinSpeed: 0
+  propSwapThreshold_Perc: 20
   throttleInd: {fileID: 258694571}
   AirspeedInd: {fileID: 1094955318}
 --- !u!136 &8442701266397948351
