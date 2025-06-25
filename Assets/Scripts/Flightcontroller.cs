@@ -9,8 +9,6 @@ public class Flightcontroller : MonoBehaviour
     // General info and input
     [Foldout("General Stats")]
     public float mass_Kg;
-    [Foldout("General Stats")]
-    public float liftMultiplier = 100f;
 
     private Rigidbody rb;
 
@@ -39,10 +37,11 @@ public class Flightcontroller : MonoBehaviour
     [Foldout("Flaps")]
     public GameObject[] flaps;
     [Foldout("Flaps")]
-    public float flapDeploySpeed;
+    public float flapDeploySpeed, flapDeployAngle;
     [Foldout("Flaps")]
-    public float flapDeployAngle;
+    public float deployedFlapsLiftModifier = 1.1f;
 
+    private float flapLiftModefier;
     private float flapFoldedAngle;
     private bool isFlapsDeployed = false, isFlapTransitionComplete = false;
     private float currentTargetAngle;
@@ -58,8 +57,10 @@ public class Flightcontroller : MonoBehaviour
     private float currentThrust = 0f;
 
     // Aerodynamics
-    [Foldout("Drag")]
+    [Foldout("Aerodynamics")]
     public float dragOverSpeedMod = 0.0005f;
+    [Foldout("Aerodynamics")]
+    public float liftMultiplier = 100f;
 
     private float drag;
     private float lowSpeedAccelDamp;
@@ -242,6 +243,13 @@ public class Flightcontroller : MonoBehaviour
 
         lowSpeedAccelDamp = 0.1f + rb.linearVelocity.magnitude * lowSpeedAccelDampMod;
         lowSpeedAccelDamp = Mathf.Clamp01(lowSpeedAccelDamp);
+
+        // Flap lift
+        if (isFlapsDeployed)
+        flapLiftModefier = deployedFlapsLiftModifier;  
+        else
+        flapLiftModefier = 1.0f;
+        
     }
     public void ApplyForces()
     {
@@ -258,14 +266,18 @@ public class Flightcontroller : MonoBehaviour
         }
 
         // Apply forces
-        rb.AddForce(transform.up * rb.linearVelocity.magnitude * liftMultiplier);
+        rb.AddForce(transform.up * rb.linearVelocity.magnitude * liftMultiplier * flapLiftModefier);
         rb.AddForce(transform.forward * thrustForce * currentThrust * lowSpeedAccelDamp);
         rb.AddTorque(transform.up * yaw * yawResponsiveness * 10000f);
         rb.AddTorque(transform.right * pitch * pitchResponsiveness * 10000f);
         rb.AddTorque(-transform.forward * roll * rollResponsiveness * 10000f);
 
         // Simulate realistic drag by dynamicly increasing drag over speed
-        drag = 1.0f + rb.linearVelocity.magnitude * dragOverSpeedMod;
+        float flapDrag = 1;
+        if (isFlapsDeployed)
+            flapDrag = 1.3f;
+
+        drag = 1.0f + rb.linearVelocity.magnitude * dragOverSpeedMod * flapDrag;
         rb.linearDamping = drag;
         rb.angularDamping = drag;
     }
