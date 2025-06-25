@@ -7,9 +7,9 @@ using System.Collections.Generic;
 public class Flightcontroller : MonoBehaviour
 {
     // General info and input
-    [Foldout("GeneralStats")]
+    [Foldout("General Stats")]
     public float mass_Kg;
-    [Foldout("GeneralStats")]
+    [Foldout("General Stats")]
     public float liftMultiplier = 100f;
 
     private Rigidbody rb;
@@ -41,7 +41,11 @@ public class Flightcontroller : MonoBehaviour
     [Foldout("Flaps")]
     public float flapDeploySpeed;
     [Foldout("Flaps")]
-    public Vector3 flapDeployAngle, flapFoldedAngle;
+    public float flapDeployAngle;
+
+    private float flapFoldedAngle;
+    private bool isFlapsDeployed = false, isFlapTransitionComplete = false;
+    private float currentTargetAngle;
 
     // Engine Force
     [Foldout("Engine")]
@@ -62,11 +66,11 @@ public class Flightcontroller : MonoBehaviour
     private float lowSpeedAccelDampMod = 0.01f;
 
     // Proplers
-    [Foldout("Propelor")]
+    [Foldout("Propellers")]
     public GameObject[] propHolders, proplers, fakeProplers;
-    [Foldout("Propelor")]
+    [Foldout("Propellers")]
     public float propSpinSpeed = 13;
-    [Foldout("Propelor")]
+    [Foldout("Propellers")]
     public float propSwapThreshold_Perc = 20f;
 
     private float currentSpinSpeed = 0f;
@@ -81,6 +85,9 @@ public class Flightcontroller : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.mass = mass_Kg;
         rb.automaticCenterOfMass = false;
+
+        // Flap start angle
+        currentTargetAngle = flapFoldedAngle;
 
         // get aileron local rot
         aileronLStartRot = aileronL.localRotation;
@@ -105,23 +112,29 @@ public class Flightcontroller : MonoBehaviour
     public void HandleInputs()
     {
         // WASDQE input
-        roll = UnityEngine.Input.GetAxis("Roll");
-        pitch = UnityEngine.Input.GetAxis("Pitch");
-        yaw = UnityEngine.Input.GetAxis("Yaw");
+        roll = Input.GetAxis("Roll");
+        pitch = Input.GetAxis("Pitch");
+        yaw = Input.GetAxis("Yaw");
 
         // Throttle input
-        if (UnityEngine.Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift))
         {
             throttle += throttleIncrement * Time.deltaTime;
         }
-        if (UnityEngine.Input.GetKey(KeyCode.LeftControl))
+        if (Input.GetKey(KeyCode.LeftControl))
         {
             throttle -= throttleIncrement * Time.deltaTime;
         }
         throttle = Mathf.Clamp(throttle, 0f, 100f);
 
         // Flap input
-        if (UnityEngine.Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            isFlapsDeployed = !isFlapsDeployed;
+            currentTargetAngle = isFlapsDeployed ? flapDeployAngle : flapFoldedAngle;
+            isFlapTransitionComplete = false;
+        }
+        if (!isFlapTransitionComplete)
         {
             ChangeFlaps();
         }
@@ -185,7 +198,27 @@ public class Flightcontroller : MonoBehaviour
 
     public void ChangeFlaps()
     {
+        bool allReachedTarget = true;
 
+        foreach (GameObject flap in flaps)
+        {
+            Vector3 currentEuler = flap.transform.localEulerAngles;
+            float currentX = NormalizeAngle(currentEuler.x);
+            float newX = Mathf.LerpAngle(currentX, currentTargetAngle, Time.deltaTime * flapDeploySpeed);
+
+            flap.transform.localEulerAngles = new Vector3(newX, currentEuler.y, currentEuler.z);
+
+            if (Mathf.Abs(NormalizeAngle(newX) - currentTargetAngle) > 0.5f)
+                allReachedTarget = false;
+        }
+
+        if (allReachedTarget)
+            isFlapTransitionComplete = true;
+
+    }
+    float NormalizeAngle(float angle)
+    {
+        return angle > 180f ? angle - 360f : angle;
     }
     public void FixedUpdate()
     {
@@ -207,7 +240,7 @@ public class Flightcontroller : MonoBehaviour
 
         thrustForce = powerWatts / speed;
 
-        lowSpeedAccelDamp = 0.2f + rb.linearVelocity.magnitude * lowSpeedAccelDampMod;
+        lowSpeedAccelDamp = 0.1f + rb.linearVelocity.magnitude * lowSpeedAccelDampMod;
         lowSpeedAccelDamp = Mathf.Clamp01(lowSpeedAccelDamp);
     }
     public void ApplyForces()

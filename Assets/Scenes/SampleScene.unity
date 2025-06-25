@@ -8779,7 +8779,7 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 0.21568628}
+      key0: {r: 1, g: 1, b: 1, a: 0.078431375}
       key1: {r: 1, g: 1, b: 1, a: 0}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
@@ -9014,7 +9014,7 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 0.21568628}
+      key0: {r: 1, g: 1, b: 1, a: 0.078431375}
       key1: {r: 1, g: 1, b: 1, a: 0}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
@@ -10516,8 +10516,8 @@ Rigidbody:
   m_GameObject: {fileID: 3465983942458815034}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
+  m_Drag: 1
+  m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -10590,7 +10590,7 @@ MonoBehaviour:
   wingTrail:
   - {fileID: 2857360866808917461}
   - {fileID: 2744806024826370755}
-  timeMultiplier: 0.002
+  timeMultiplier: 0.001
   speedMultiplier: 0.02
 --- !u!114 &8442701266397948349
 MonoBehaviour:
@@ -10640,20 +10640,22 @@ MonoBehaviour:
   aileronR: {fileID: 7301699678709220478}
   aileronMaxRot: 35
   elevatorMaxRot: 35
-  rudderMaxRot: 25
+  rudderMaxRot: 15
   controlSurfRotSpeed: 10
   rollResponsiveness: 2.5
-  pitchResponsiveness: 2.5
+  pitchResponsiveness: 3
   yawResponsiveness: 3.5
-  flaps: []
+  flaps:
+  - {fileID: 459425083038408900}
+  - {fileID: 8962648693224369504}
+  - {fileID: 5925601575029818064}
   flapDeploySpeed: 5
-  flapDeployAngle: {x: 0, y: 0, z: 0}
-  flapFoldedAngle: {x: 0, y: 0, z: 0}
+  flapDeployAngle: -40
   enginePower_Hp: 1460
   throttleIncrement: 30
   accelerationRate: 2
-  decelerationRate: 2
-  dragOverSpeedMod: 0.00055
+  decelerationRate: 4
+  dragOverSpeedMod: 0.0015
   propHolders:
   - {fileID: 216163368}
   - {fileID: 903206124}
