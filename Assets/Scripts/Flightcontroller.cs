@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
 using NaughtyAttributes;
+using System.Linq;
+using System.Collections.Generic;
 
 public class Flightcontroller : MonoBehaviour
 {
@@ -14,9 +16,9 @@ public class Flightcontroller : MonoBehaviour
 
     // Controll Surfaces
     [Foldout("Control Surfaces")]
-    public GameObject[] elevators, rudder;
+    public List<Transform> elevators_LeftFirst = new(), rudders_LeftFirst = new();
     [Foldout("Control Surfaces")]
-    public GameObject aileronL, aileronR;
+    public Transform aileronL, aileronR;
     [Foldout("Control Surfaces")]
     public float aileronMaxRot, elevatorMaxRot, rudderMaxRot, controlSurfRotSpeed;
     [Foldout("Control Surfaces")]
@@ -24,6 +26,14 @@ public class Flightcontroller : MonoBehaviour
 
     private float currentAileronAngle, currentElevatorAngle, currentRudderAngle;
     private float roll, pitch, yaw;
+    private float controlSurfLerpSpeed = 5f;
+
+    private Quaternion aileronLStartRot;
+    private Quaternion aileronRStartRot;
+    private Quaternion elevatorLStartRot;
+    private Quaternion elevatorRStartRot;
+    private Quaternion rudderLStartRot;
+    private Quaternion rudderRStartRot;
 
     // Flaps
     [Foldout("Flaps")]
@@ -35,9 +45,9 @@ public class Flightcontroller : MonoBehaviour
 
     // Engine Force
     [Foldout("Engine")]
-    public float accelerationRate = 2f, decelerationRate = 2f;
+    public float enginePower_Hp = 200f, throttleIncrement = 30f;
     [Foldout("Engine")]
-    public float throttleIncrement = 30f, enginePower_Hp = 200f;
+    public float accelerationRate = 2f, decelerationRate = 2f;
 
     private float thrustForce;
     private float throttle;
@@ -71,6 +81,20 @@ public class Flightcontroller : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.mass = mass_Kg;
         rb.automaticCenterOfMass = false;
+
+        // get aileron local rot
+        aileronLStartRot = aileronL.localRotation;
+        aileronRStartRot = aileronR.localRotation;
+        
+        // get elevator local rot
+        elevatorLStartRot = elevators_LeftFirst[0].localRotation;
+        if (elevators_LeftFirst.Count > 1)
+            elevatorRStartRot = elevators_LeftFirst[1].localRotation;
+
+        // get rudder local rot
+        rudderLStartRot = rudders_LeftFirst[0].localRotation;
+        if (rudders_LeftFirst.Count > 1)
+            rudderRStartRot = rudders_LeftFirst[1].localRotation;
     }
     public void Update()
     {
@@ -104,15 +128,61 @@ public class Flightcontroller : MonoBehaviour
     }
     public void RotateControlSurfaces()
     {
-        float aileronDelta = roll * controlSurfRotSpeed * Time.deltaTime;
+        // Aileron rotation
+        float ailTarget = roll * aileronMaxRot;
+        // Pick smooth speed depending on direction
+        float ailRotSpeed = Mathf.Abs(ailTarget) > Mathf.Abs(currentAileronAngle)
+            ? controlSurfRotSpeed
+            : controlSurfLerpSpeed;
 
-        currentAileronAngle = Mathf.Clamp(currentAileronAngle + aileronDelta, -aileronMaxRot, aileronMaxRot);
+        currentAileronAngle = Mathf.Lerp(currentAileronAngle, ailTarget, Time.deltaTime * ailRotSpeed);
 
-        Vector3 changeAngles = aileronR.transform.localEulerAngles;
-        changeAngles.x = -currentAileronAngle;
-        aileronR.transform.localEulerAngles = changeAngles;
-        aileronL.transform.localEulerAngles = -changeAngles;
+        // Apply local X rotation relative to rest rotation
+        Quaternion aileronLRot = Quaternion.AngleAxis(-currentAileronAngle, Vector3.right);
+        Quaternion aileronRRot = Quaternion.AngleAxis(currentAileronAngle, Vector3.right);
+
+        aileronL.localRotation = aileronLStartRot * aileronLRot;
+        aileronR.localRotation = aileronRStartRot * aileronRRot;
+
+
+        // Elevator rotation
+        float elevTarget = pitch * elevatorMaxRot;
+        // Pick smooth speed depending on direction
+        float elevatorRotSpeed = Mathf.Abs(elevTarget) > Mathf.Abs(currentElevatorAngle)
+            ? controlSurfRotSpeed
+            : controlSurfLerpSpeed;
+
+        currentElevatorAngle = Mathf.Lerp(currentElevatorAngle, elevTarget, Time.deltaTime * elevatorRotSpeed);
+
+        // Apply local X rotation relative to rest rotation
+        Quaternion elevatorLRot = Quaternion.AngleAxis(-currentElevatorAngle, Vector3.right);
+        Quaternion elevatorRRot = Quaternion.AngleAxis(-currentElevatorAngle, Vector3.right);
+
+        elevators_LeftFirst[0].localRotation = elevatorLStartRot * elevatorLRot;
+        // check if there is a second elevator
+        if (elevators_LeftFirst.Count > 1)
+            elevators_LeftFirst[1].localRotation = elevatorRStartRot * elevatorRRot;
+
+
+        // Rudder rotation
+        float rudTarget = yaw * rudderMaxRot;
+        // Pick smooth speed depending on direction
+        float rudderRotSpeed = Mathf.Abs(rudTarget) > Mathf.Abs(currentRudderAngle)
+            ? controlSurfRotSpeed
+            : controlSurfLerpSpeed;
+
+        currentRudderAngle = Mathf.Lerp(currentRudderAngle, rudTarget, Time.deltaTime * rudderRotSpeed);
+
+        // Apply local X rotation relative to rest rotation
+        Quaternion rudderLRot = Quaternion.AngleAxis(-currentRudderAngle, Vector3.up);
+        Quaternion rudderRRot = Quaternion.AngleAxis(-currentRudderAngle, Vector3.up);
+
+        rudders_LeftFirst[0].localRotation = rudderLStartRot * rudderLRot;
+        // check if there is a second elevator
+        if (rudders_LeftFirst.Count > 1)
+            rudders_LeftFirst[1].localRotation = rudderRStartRot * rudderRRot;
     }
+
     public void ChangeFlaps()
     {
 

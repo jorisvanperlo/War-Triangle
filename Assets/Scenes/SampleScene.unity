@@ -10516,8 +10516,8 @@ Rigidbody:
   m_GameObject: {fileID: 3465983942458815034}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 1
-  m_AngularDrag: 1
+  m_Drag: 0
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -10631,26 +10631,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mass_Kg: 4800
   liftMultiplier: 100
-  elevators: []
-  rudder: []
-  aileronL: {fileID: 6984013612281578914}
-  aileronR: {fileID: 5393462718378469988}
+  elevators_LeftFirst:
+  - {fileID: 5149041477995861308}
+  rudders_LeftFirst:
+  - {fileID: 7352530119579102939}
+  - {fileID: 1363067469311754117}
+  aileronL: {fileID: 6130763558486592864}
+  aileronR: {fileID: 7301699678709220478}
   aileronMaxRot: 35
   elevatorMaxRot: 35
-  rudderMaxRot: 35
-  controlSurfRotSpeed: 200
-  rollResponsiveness: 2
-  pitchResponsiveness: 2
+  rudderMaxRot: 25
+  controlSurfRotSpeed: 10
+  rollResponsiveness: 2.5
+  pitchResponsiveness: 2.5
   yawResponsiveness: 3.5
   flaps: []
   flapDeploySpeed: 5
   flapDeployAngle: {x: 0, y: 0, z: 0}
   flapFoldedAngle: {x: 0, y: 0, z: 0}
+  enginePower_Hp: 1460
+  throttleIncrement: 30
   accelerationRate: 2
   decelerationRate: 2
-  throttleIncrement: 100
-  enginePower_Hp: 1460
-  dragOverSpeedMod: 0.0005
+  dragOverSpeedMod: 0.00055
   propHolders:
   - {fileID: 216163368}
   - {fileID: 903206124}
@@ -10660,8 +10663,8 @@ MonoBehaviour:
   fakeProplers:
   - {fileID: 1092507096316188619}
   - {fileID: 1488412242}
-  propSpinSpeed: 0
-  propSwapThreshold_Perc: 20
+  propSpinSpeed: 13
+  propSwapThreshold_Perc: 25
   throttleInd: {fileID: 258694571}
   AirspeedInd: {fileID: 1094955318}
 --- !u!136 &8442701266397948351
