@@ -10,6 +10,7 @@ public class Flightcontroller : MonoBehaviour
     [Foldout("General Stats")]
     public float mass_Kg;
 
+    private float flySpeed;
     private Rigidbody rb;
 
     // Controll Surfaces
@@ -41,11 +42,13 @@ public class Flightcontroller : MonoBehaviour
     [Foldout("Flaps")]
     public float deployedFlapsLiftModifier = 1.1f;
 
-    private float flapLiftModefier;
+    private float flapLiftModifier;
     private float flapFoldedAngle;
-    private bool isFlapsDeployed = false, isFlapTransitionComplete = false;
+    private bool isFlapsDeployed = false;
     private float currentTargetAngle;
 
+    private float flapDragMul;
+    private Quaternion[] flapTargetRotations;
     // Engine Force
     [Foldout("Engine")]
     public float enginePower_Hp = 200f, throttleIncrement = 30f;
@@ -63,6 +66,9 @@ public class Flightcontroller : MonoBehaviour
     public float liftMultiplier = 100f;
 
     private float drag;
+    private float angleDragMul;
+    private float targetDrag;
+    private float dragChangeSpeed = 0.2f;
     private float lowSpeedAccelDamp;
     private float lowSpeedAccelDampMod = 0.01f;
 
@@ -72,28 +78,63 @@ public class Flightcontroller : MonoBehaviour
     [Foldout("Propellers")]
     public float propSpinSpeed = 13;
     [Foldout("Propellers")]
-    public float propSwapThreshold_Perc = 20f;
+    public float propSwapThreshold_Perc = 25f;
 
-    private float currentSpinSpeed = 0f;
+    private float currentSpinSpeed;
     private bool propState;
     private bool previousPropState;
+
+    // Landing gear
+    [Foldout("Landing Gear")]
+    public float gearFoldedAngle, gearDeploySpeed = 0.5f, groundCheckRayLenght = 1f, gearWheelTurnSpeed = 5;
+    [Foldout("Landing Gear")]
+    public bool hideGearWhenFolded;
+    [Foldout("Landing Gear")]
+    public GameObject[] landingGear, landingGearWheels;
+
+
+    private bool isGearDeployed = true;
+    private float gearDeployAngle, gearDragMul;
+    private Quaternion[] deployedGearRotations;
+    private Quaternion[] foldedGearRotations;
+    private Quaternion[] gearTargetRotations;
 
     // UI
     [Foldout("UI")]
     public TextMeshProUGUI throttleInd, AirspeedInd;
+
+    private float prevThrottle, prevSpeed;
     public void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.mass = mass_Kg;
         rb.automaticCenterOfMass = false;
 
-        // Flap start angle
-        currentTargetAngle = flapFoldedAngle;
-
         // get aileron local rot
         aileronLStartRot = aileronL.localRotation;
         aileronRStartRot = aileronR.localRotation;
-        
+
+        // get flap angle
+        flapTargetRotations = new Quaternion[flaps.Length];
+
+        // get gear angle 
+        gearTargetRotations = new Quaternion[landingGear.Length];
+        deployedGearRotations = new Quaternion[landingGear.Length];
+        foldedGearRotations = new Quaternion[landingGear.Length];
+
+        for (int i = 0; i < landingGear.Length; i++)
+        {
+            if (landingGear[i] == null) continue;
+
+            deployedGearRotations[i] = Quaternion.Euler(gearDeployAngle,
+                landingGear[i].transform.localEulerAngles.y,
+                landingGear[i].transform.localEulerAngles.z);
+
+            foldedGearRotations[i] = Quaternion.Euler(gearFoldedAngle,
+                landingGear[i].transform.localEulerAngles.y,
+                landingGear[i].transform.localEulerAngles.z);
+        }
+
         // get elevator local rot
         elevatorLStartRot = elevators_LeftFirst[0].localRotation;
         if (elevators_LeftFirst.Count > 1)
@@ -131,13 +172,17 @@ public class Flightcontroller : MonoBehaviour
         // Flap input
         if (Input.GetKeyDown(KeyCode.F))
         {
-            isFlapsDeployed = !isFlapsDeployed;
-            currentTargetAngle = isFlapsDeployed ? flapDeployAngle : flapFoldedAngle;
-            isFlapTransitionComplete = false;
-        }
-        if (!isFlapTransitionComplete)
-        {
             ChangeFlaps();
+        }
+        // Landing gear input
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            ChangeGears();
+            if (hideGearWhenFolded && !isGearDeployed)
+                foreach (GameObject Gear in landingGear)
+                {
+                    Gear.gameObject.SetActive(true);
+                }
         }
     }
     public void RotateControlSurfaces()
@@ -199,28 +244,98 @@ public class Flightcontroller : MonoBehaviour
 
     public void ChangeFlaps()
     {
-        bool allReachedTarget = true;
+        isFlapsDeployed = !isFlapsDeployed;
+        currentTargetAngle = isFlapsDeployed ? flapDeployAngle : flapFoldedAngle;
 
-        foreach (GameObject flap in flaps)
+        for (int i = 0; i < flaps.Length; i++)
         {
-            Vector3 currentEuler = flap.transform.localEulerAngles;
-            float currentX = NormalizeAngle(currentEuler.x);
-            float newX = Mathf.LerpAngle(currentX, currentTargetAngle, Time.deltaTime * flapDeploySpeed);
+            if (flaps[i] == null) continue;
 
-            flap.transform.localEulerAngles = new Vector3(newX, currentEuler.y, currentEuler.z);
+            Vector3 currentEuler = flaps[i].transform.localEulerAngles;
+            Vector3 targetEuler = new Vector3(currentTargetAngle, currentEuler.y, currentEuler.z);
+            flapTargetRotations[i] = Quaternion.Euler(targetEuler);
+        }
+        StartCoroutine(SmoothRotateFlaps());
+    }
+    private System.Collections.IEnumerator SmoothRotateFlaps()
+    {
+        while (true)
+        {
+            bool allComplete = true;
 
-            if (Mathf.Abs(NormalizeAngle(newX) - currentTargetAngle) > 0.5f)
-                allReachedTarget = false;
+            for (int i = 0; i < flaps.Length; i++)
+            {
+                if (flaps[i] == null) continue;
+
+                flaps[i].transform.localRotation = Quaternion.RotateTowards(
+                    flaps[i].transform.localRotation,
+                    flapTargetRotations[i],
+                    flapDeploySpeed * Time.deltaTime
+                );
+
+                if (Quaternion.Angle(flaps[i].transform.localRotation, flapTargetRotations[i]) > 0.1f)
+                {
+                    allComplete = false;
+                }
+            }
+            if (allComplete)
+            {
+                yield break;
+            }
+            yield return null;
+        }
+    }
+    public void ChangeGears()
+    {
+        isGearDeployed = !isGearDeployed;
+
+        for (int i = 0; i < landingGear.Length; i++)
+        {
+            if (landingGear[i] == null) continue;
+
+            gearTargetRotations[i] = isGearDeployed ? deployedGearRotations[i] : foldedGearRotations[i];
+
+            // Re-enable gear in case it's hidden
+            if (!landingGear[i].activeSelf)
+                landingGear[i].SetActive(true);
         }
 
-        if (allReachedTarget)
-            isFlapTransitionComplete = true;
-
+        StartCoroutine(SmoothRotateGears());
     }
-    float NormalizeAngle(float angle)
+    private System.Collections.IEnumerator SmoothRotateGears()
     {
-        return angle > 180f ? angle - 360f : angle;
+        while (true)
+        {
+            bool allComplete = true;
+
+            for (int i = 0; i < landingGear.Length; i++)
+            {
+                if (landingGear[i] == null) continue;
+
+                landingGear[i].transform.localRotation = Quaternion.RotateTowards(
+                    landingGear[i].transform.localRotation,
+                    gearTargetRotations[i],
+                    gearDeploySpeed * Time.deltaTime
+                );
+
+                if (Quaternion.Angle(landingGear[i].transform.localRotation, gearTargetRotations[i]) > 0.1f)
+                {
+                    allComplete = false;
+                }
+            }
+            if (allComplete)
+            {
+                if (hideGearWhenFolded && !isGearDeployed)
+                    foreach (GameObject Gear in landingGear)
+                    {
+                        Gear.gameObject.SetActive(false);
+                    }
+                yield break;
+            }
+            yield return null;
+        }
     }
+
     public void FixedUpdate()
     {
         CalculateForce();
@@ -228,11 +343,16 @@ public class Flightcontroller : MonoBehaviour
         ApplyForces();
 
         RotatePropellors();
+
+        CheckForGround();
     }
 
     public void CalculateForce()
     {
-        // HP to Newtons
+        // Get flying speed
+        flySpeed = rb.linearVelocity.magnitude;
+
+        // HP to Newtons (temp speed float for this caculation)
         float speed = rb.linearVelocity.magnitude;
         float powerWatts = enginePower_Hp * 745.69f;
 
@@ -241,15 +361,31 @@ public class Flightcontroller : MonoBehaviour
 
         thrustForce = powerWatts / speed;
 
-        lowSpeedAccelDamp = 0.1f + rb.linearVelocity.magnitude * lowSpeedAccelDampMod;
+        lowSpeedAccelDamp = 0.1f + flySpeed * lowSpeedAccelDampMod;
         lowSpeedAccelDamp = Mathf.Clamp01(lowSpeedAccelDamp);
 
         // Flap lift
         if (isFlapsDeployed)
-        flapLiftModefier = deployedFlapsLiftModifier;  
+        flapLiftModifier = deployedFlapsLiftModifier;  
         else
-        flapLiftModefier = 1.0f;
-        
+        flapLiftModifier = 1.0f;
+
+        // Claculate Drag
+        if (isFlapsDeployed)
+            flapDragMul = 3f;
+        else flapDragMul = 1;
+
+        if (isGearDeployed)
+            gearDragMul = 2f;
+        else gearDragMul = 1f;
+
+
+        // Get how much the object is looking "up" (dot with world up)
+        float lookUpAmount = Vector3.Dot(transform.forward.normalized, Vector3.up);
+
+        // Remap from dot range [-1, 1] to dragChangeSpeed [1, 2]
+        angleDragMul = Mathf.Lerp(1f, 4f, Mathf.Clamp01(lookUpAmount));
+
     }
     public void ApplyForces()
     {
@@ -266,20 +402,17 @@ public class Flightcontroller : MonoBehaviour
         }
 
         // Apply forces
-        rb.AddForce(transform.up * rb.linearVelocity.magnitude * liftMultiplier * flapLiftModefier);
+        rb.AddForce(transform.up * flySpeed * liftMultiplier * flapLiftModifier);
         rb.AddForce(transform.forward * thrustForce * currentThrust * lowSpeedAccelDamp);
-        rb.AddTorque(transform.up * yaw * yawResponsiveness * 10000f);
-        rb.AddTorque(transform.right * pitch * pitchResponsiveness * 10000f);
-        rb.AddTorque(-transform.forward * roll * rollResponsiveness * 10000f);
+        rb.AddTorque(transform.up * yaw * flySpeed * yawResponsiveness * 200f);
+        rb.AddTorque(transform.right * pitch * flySpeed * pitchResponsiveness * 50f);
+        rb.AddTorque(-transform.forward * roll * flySpeed * rollResponsiveness * 350f);
 
-        // Simulate realistic drag by dynamicly increasing drag over speed
-        float flapDrag = 1;
-        if (isFlapsDeployed)
-            flapDrag = 1.3f;
-
-        drag = 1.0f + rb.linearVelocity.magnitude * dragOverSpeedMod * flapDrag;
+        // Calculate Target drag and lerp to drag
+        targetDrag = 1.0f + flySpeed * dragOverSpeedMod * flapDragMul * gearDragMul * angleDragMul;
+        drag = Mathf.Lerp(drag, targetDrag, dragChangeSpeed * Time.deltaTime);
         rb.linearDamping = drag;
-        rb.angularDamping = drag;
+        rb.angularDamping = 1.0f + flySpeed * dragOverSpeedMod;
     }
     public void RotatePropellors()
     {
@@ -314,11 +447,38 @@ public class Flightcontroller : MonoBehaviour
             obj.transform.Rotate(Vector3.forward, rotationPerFrame);
         }
     }
+    public void CheckForGround()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, groundCheckRayLenght) && isGearDeployed)
+        {
+            if (hit.collider.tag == "Floor")
+            {
+                RotateWheels();
+                print("Grounded");
+            }
+        }
+    }
+    public void RotateWheels()
+    {
+        foreach(GameObject W in landingGearWheels)
+        {
+            W.transform.Rotate(Vector3.right * flySpeed * gearWheelTurnSpeed * 10 * Time.deltaTime);
+        }
+    }
 
     public void UpdateUI()
     {
-        throttleInd.text = throttle.ToString("F0") + "%";
+        if (Mathf.Abs(prevThrottle - throttle) > 0.1f)
+        {
+            throttleInd.text = throttle.ToString("F0") + "%";
+            prevThrottle = throttle;
+        }
 
-        AirspeedInd.text = (rb.linearVelocity.magnitude * 3.6f).ToString("F0") + "KM/H";
+        if (Mathf.Abs(prevSpeed - flySpeed) > 0.1f)
+        {
+            AirspeedInd.text = (flySpeed * 3.6f).ToString("F0") + "KM/H";
+            prevSpeed = flySpeed;
+        }
     }
 }
