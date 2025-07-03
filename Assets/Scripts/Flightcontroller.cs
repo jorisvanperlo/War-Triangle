@@ -58,17 +58,19 @@ public class Flightcontroller : MonoBehaviour
     private float thrustForce;
     private float throttle;
     private float currentThrust = 0f;
+    private float thrustReduceOverAngle = 1;
 
     // Aerodynamics
     [Foldout("Aerodynamics")]
     public float dragOverSpeedMod = 0.0005f;
     [Foldout("Aerodynamics")]
     public float liftMultiplier = 100f;
+    [Foldout("Aerodynamics")]
+    public AnimationCurve dragOverAngle;
 
     private float drag;
-    private float angleDragMul;
     private float targetDrag;
-    private float dragChangeSpeed = 0.2f;
+    private float dragChangeSpeed = 0.1f;
     private float lowSpeedAccelDamp;
     private float lowSpeedAccelDampMod = 0.01f;
 
@@ -382,9 +384,8 @@ public class Flightcontroller : MonoBehaviour
 
         // Get how much the object is looking "up" (dot with world up)
         float lookUpAmount = Vector3.Dot(transform.forward.normalized, Vector3.up);
-
-        // Remap from dot range [-1, 1] to dragChangeSpeed [1, 2]
-        angleDragMul = Mathf.Lerp(1f, 4f, Mathf.Clamp01(lookUpAmount));
+        float thrustReduceLerp = dragOverAngle.Evaluate(lookUpAmount);
+        thrustReduceOverAngle = Mathf.Lerp(thrustReduceOverAngle, thrustReduceLerp, 0.2f * Time.deltaTime);
 
     }
     public void ApplyForces()
@@ -403,13 +404,13 @@ public class Flightcontroller : MonoBehaviour
 
         // Apply forces
         rb.AddForce(transform.up * flySpeed * liftMultiplier * flapLiftModifier);
-        rb.AddForce(transform.forward * thrustForce * currentThrust * lowSpeedAccelDamp);
-        rb.AddTorque(transform.up * yaw * flySpeed * yawResponsiveness * 200f);
-        rb.AddTorque(transform.right * pitch * flySpeed * pitchResponsiveness * 50f);
-        rb.AddTorque(-transform.forward * roll * flySpeed * rollResponsiveness * 350f);
+        rb.AddForce(transform.forward * thrustForce * thrustReduceOverAngle * currentThrust * lowSpeedAccelDamp);
+        rb.AddTorque(transform.up * yaw * (flySpeed * 0.5f) * yawResponsiveness * 200f);
+        rb.AddTorque(transform.right * pitch * (flySpeed * 0.5f) * pitchResponsiveness * 50f);
+        rb.AddTorque(-transform.forward * roll * (flySpeed * 0.5f) * rollResponsiveness * 350f);
 
         // Calculate Target drag and lerp to drag
-        targetDrag = 1.0f + flySpeed * dragOverSpeedMod * flapDragMul * gearDragMul * angleDragMul;
+        targetDrag = 1.0f + flySpeed * dragOverSpeedMod * flapDragMul * gearDragMul; 
         drag = Mathf.Lerp(drag, targetDrag, dragChangeSpeed * Time.deltaTime);
         rb.linearDamping = drag;
         rb.angularDamping = 1.0f + flySpeed * dragOverSpeedMod;
@@ -455,7 +456,7 @@ public class Flightcontroller : MonoBehaviour
             if (hit.collider.tag == "Floor")
             {
                 RotateWheels();
-                print("Grounded");
+
             }
         }
     }

@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MatOcean
-  m_Shader: {fileID: -6465566751694194690, guid: 391c615c293af6e4cb8989003f35b1de, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 8c0ccabf025e79942a0e0d2522ac5bc9, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -149,12 +149,11 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _Threshold: 5
-    - _WaveHeight: 6
+    - _WaveHeight: 10
     - _WaveHeiht: 8
     - _WaveSpeed: 0.01
-    - _WaveTiling: 20
+    - _WaveTiling: 30
     - _WorkflowMode: 1
-    - _WorldTiling: 1
     - _ZWrite: 1
     - _alpha: 0.5
     - _blend: 1.3
@@ -178,10 +177,9 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamCol: {r: 0, g: 0.815907, b: 1, a: 0}
     - _FoamColor: {r: 1, g: 1, b: 1, a: 0}
-    - _Light_color: {r: 0.2684228, g: 0.6418605, b: 0.9811321, a: 0}
+    - _Light_color: {r: 0.11801341, g: 0.4657071, b: 0.735849, a: 0}
     - _Shallow: {r: 0, g: 0.8555031, b: 1, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _Worldtiling: {r: 0, g: 0, b: 0, a: 0}
     - _absorbtionCOl: {r: 0.5597484, g: 0.29424068, b: 0.01584184, a: 0}
     - _deep: {r: 0.14465404, g: 0.14465404, b: 0.14465404, a: 0}
     - _deep_water: {r: 0.001503004, g: 0.2763489, b: 0.47798735, a: 0}
@@ -191,7 +189,7 @@ Material:
     - _lerpcolor: {r: 0, g: 0, b: 0, a: 0}
     - _shallow: {r: 0, g: 0, b: 0, a: 0}
     - _shalow_water: {r: 0, g: 0.996511, b: 1, a: 0}
-    - _water_color: {r: 0.98742133, g: 0.98742133, b: 0.98742133, a: 0}
+    - _water_color: {r: 1, g: 1, b: 1, a: 0}
     - _white: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
