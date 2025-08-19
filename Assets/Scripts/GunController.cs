@@ -4,26 +4,23 @@ using UnityEngine;
 
 public class GunController : MonoBehaviour
 {
-    public GameObject bulletPrefab;           // Bullet prefab
-    public float shootForce;                  // Force applied to bullets
-    public float rpm;                         // Rounds per minute (controls fire rate)
-    public float spread;                      // Spread angle in degrees
-    public float reloadTime;                  // Time to reload the weapon
-    public int magazineSize;                  // Ammo per magazine
-    public Transform[] bulletSpawnPoints;     // All gun barrels
-    public int poolSize = 50;                 // Size of bullet object pool
+    public GameObject bulletPrefab;
+    public float shootForce;
+    public float rpm;
+    public float spread;
+    public float reloadTime;
+    public int magazineSize;
+    public Transform[] bulletSpawnPoints;
+    public int poolSize = 50;
+    public float bulletLifeTime;
 
     private bool canShoot = true;
     private bool isReloading = false;
     private float nextFireTime = 0f;
     private int currentAmmo;
     private Queue<GameObject> bulletPool = new();
-
-    public float bulletLifeTime;
-
     private Rigidbody rb;
 
-    //MuzzleFlash
     public GameObject[] muzzleFlashes;
     public float flashDuration = 0.2f;
 
@@ -31,7 +28,7 @@ public class GunController : MonoBehaviour
     {
         currentAmmo = magazineSize;
         rb = GetComponent<Rigidbody>();
-        // Initialize bullet pool
+
         for (int i = 0; i < poolSize; i++)
         {
             GameObject b = Instantiate(bulletPrefab);
@@ -46,7 +43,6 @@ public class GunController : MonoBehaviour
         {
             FireInput();
 
-            // Manual reload
             if (Input.GetKeyDown(KeyCode.R) && currentAmmo < magazineSize)
             {
                 StartCoroutine(Reload());
@@ -62,7 +58,6 @@ public class GunController : MonoBehaviour
             currentAmmo--;
             nextFireTime = Time.time + 60f / rpm;
 
-            // Auto reload if out of ammo
             if (currentAmmo <= 0)
             {
                 StartCoroutine(Reload());
@@ -72,16 +67,15 @@ public class GunController : MonoBehaviour
 
     private void Shoot()
     {
-        // Not enough bullets in pool for a full volley
         if (bulletPool.Count < bulletSpawnPoints.Length) return;
+
+        Vector3 inheritedVelocity = rb != null ? rb.linearVelocity : Vector3.zero;
 
         foreach (Transform spawnPoint in bulletSpawnPoints)
         {
             GameObject bullet = bulletPool.Dequeue();
             bullet.transform.position = spawnPoint.position;
 
-
-            // Apply spread
             Quaternion spreadRotation = Quaternion.Euler(
                 Random.Range(-spread, spread),
                 Random.Range(-spread, spread),
@@ -92,20 +86,29 @@ public class GunController : MonoBehaviour
             bullet.transform.rotation = Quaternion.LookRotation(shotDirection);
             bullet.SetActive(true);
 
-
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
-            if (rb != null)
+            Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+            if (bulletRb != null)
             {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-                Rigidbody shooterRb = GetComponent<Rigidbody>(); // Assuming the shooter has a Rigidbody
-                Vector3 inheritedVelocity = shooterRb != null ? shooterRb.linearVelocity : Vector3.zero;
-                rb.linearVelocity = inheritedVelocity + shotDirection * shootForce;
+                bulletRb.linearVelocity = Vector3.zero;
+                bulletRb.angularVelocity = Vector3.zero;
+
+                Vector3 advanceOffset = inheritedVelocity * Time.fixedDeltaTime;
+                bullet.transform.position += advanceOffset;
+
+                bulletRb.linearVelocity = inheritedVelocity + shotDirection * shootForce;
             }
 
-            // Disable and return to pool after reloadTime
+            TrailRenderer trail = bullet.GetComponent<TrailRenderer>();
+            if (trail != null)
+            {
+                trail.Clear();
+                trail.emitting = false;
+                StartCoroutine(EnableTrailDelayed(trail, 0.001f));
+            }
+
             StartCoroutine(DisableAfterTime(bullet, bulletLifeTime));
         }
+
         StartCoroutine(FlashMuzzle());
     }
 
@@ -113,12 +116,24 @@ public class GunController : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         bullet.SetActive(false);
+
         TrailRenderer trail = bullet.GetComponent<TrailRenderer>();
         if (trail != null)
         {
-            trail.Clear(); // Reset the trail before showing the bullet again
+            trail.Clear();
+            trail.emitting = false;
         }
+
         bulletPool.Enqueue(bullet);
+    }
+
+    private IEnumerator EnableTrailDelayed(TrailRenderer trail, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (trail != null && trail.gameObject.activeInHierarchy)
+        {
+            trail.emitting = true;
+        }
     }
 
     private IEnumerator Reload()
@@ -128,6 +143,7 @@ public class GunController : MonoBehaviour
         currentAmmo = magazineSize;
         isReloading = false;
     }
+
     private IEnumerator FlashMuzzle()
     {
         foreach (GameObject flash in muzzleFlashes)

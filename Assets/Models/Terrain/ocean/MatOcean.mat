@@ -130,6 +130,7 @@ Material:
     - _EnvironmentReflections: 1
     - _FoamColor: -1.74
     - _FoamDepth: 0.43
+    - _FoamDistance: 0
     - _FoamScale: 2.5
     - _FoamSpeed: 2.83
     - _GlossMapScale: 0

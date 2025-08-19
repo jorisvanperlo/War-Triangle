@@ -29,6 +29,9 @@
         },
         {
             "m_Id": "6d4a88403ee44f589a60e0881eaa7705"
+        },
+        {
+            "m_Id": "6dc131e338b84b62b0e0d5a1b61b9069"
         }
     ],
     "m_Keywords": [],
@@ -748,6 +751,9 @@
         },
         {
             "m_Id": "6d4a88403ee44f589a60e0881eaa7705"
+        },
+        {
+            "m_Id": "6dc131e338b84b62b0e0d5a1b61b9069"
         }
     ]
 }
@@ -1471,6 +1477,34 @@
         "y": -0.20000000298023225,
         "z": 0.0,
         "w": 0.0
+    }
+}
+
+{
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "6dc131e338b84b62b0e0d5a1b61b9069",
+    "m_Guid": {
+        "m_GuidSerialized": "ffe75921-d754-4215-a845-bba4086899ed"
+    },
+    "m_Name": "FoamDistance",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "FoamDistance",
+    "m_DefaultReferenceName": "_FoamDistance",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 0.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
     }
 }
 

@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: G1Proppy
-  m_Shader: {fileID: -6465566751694194690, guid: 74c684ba475f4f946889910c4e28b37e, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 47b5d180f93fd5d438595f7bb2e1f940, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -121,7 +121,7 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _OcclusionStrength: 1
-    - _Opacity: 0
+    - _Opacity: 0.1
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
