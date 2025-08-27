@@ -120,6 +120,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
+    - _Multiplier: 4
+    - _OPMultiplier: 1
     - _OcclusionStrength: 1
     - _Opacity: 0
     - _Parallax: 0.005

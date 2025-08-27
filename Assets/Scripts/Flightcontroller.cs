@@ -90,7 +90,7 @@ public class Flightcontroller : MonoBehaviour
 
     // UI
     [Foldout("UI")]
-    public TextMeshProUGUI throttleInd, airspeedInd, altitudeInd ,radarAltitudeInd , climAngleInd;
+    public TMP_Text throttleInd, airspeedInd, altitudeInd ,radarAltitudeInd , climbAngleInd;
 
     private float prevThrottle, prevSpeed, prevAlt, prevClimbAngle;
 
@@ -105,6 +105,15 @@ public class Flightcontroller : MonoBehaviour
 
     public void Start()
     {
+        //getting UI elements
+        throttleInd = GameObject.Find("Throttle").GetComponent<TMP_Text>();
+        airspeedInd = GameObject.Find("Airspeed").GetComponent<TMP_Text>();
+        altitudeInd = GameObject.Find("Altitude").GetComponent<TMP_Text>();
+        radarAltitudeInd = GameObject.Find("Radar Altitude").GetComponent<TMP_Text>();
+        climbAngleInd = GameObject.Find("ClimbAngle").GetComponent<TMP_Text>();
+
+        //getting in game components
+        cam = Camera.main;
         rb = GetComponent<Rigidbody>();
         rb.mass = mass_Kg;
         rb.automaticCenterOfMass = false;
@@ -580,7 +589,7 @@ public class Flightcontroller : MonoBehaviour
         if (Mathf.Abs(prevClimbAngle - lookUpAmount) > 0.008f)
         {
             float climbAngle = Mathf.Asin(lookUpAmount) * Mathf.Rad2Deg; // in degrees
-            climAngleInd.text = "ANG " + climbAngle.ToString("F0") + "°";
+            climbAngleInd.text = "ANG " + climbAngle.ToString("F0") + "°";
             prevClimbAngle = lookUpAmount;
         }
     }

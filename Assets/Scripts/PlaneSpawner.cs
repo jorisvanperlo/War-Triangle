@@ -2,9 +2,29 @@ using UnityEngine;
 
 public class PlaneSpawner : MonoBehaviour
 {
-    public GameObject[] Planes;
+    public GameObject[] planes;
+    public Vector3[] planeSpawn;
+    private Vector3 curPlaneSpawn;
+
+    public Vector3[] planeRot;
+    private Vector3 curPlaneRot;
+
+    public int defaultPlane;
     void Start()
     {
-        Instantiate(Planes[ButtonInteractions.chosenPlane - 1], new Vector3(0,75,0), Quaternion.identity);
+        //Setresolution
+        Screen.SetResolution(398, 224, true);
+
+        int index = ButtonInteractions.chosenPlane - 1;
+        if (index <= 0) { index = defaultPlane; }
+
+        curPlaneSpawn = planeSpawn[index];
+        curPlaneRot = planeRot[index];
+
+        Instantiate(
+            planes[index],
+            curPlaneSpawn,
+            Quaternion.Euler(curPlaneRot)
+        );
     }
 }

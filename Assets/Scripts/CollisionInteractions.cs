@@ -12,6 +12,8 @@ public class CollisionInteractions : MonoBehaviour
     private bool dead;
     void Start()
     {
+        deathExplosion = GameObject.Find("DeathExplosion");
+        deathExplosion.SetActive(false);
         planeMat = GetComponent<Renderer>().material;
         rb = GetComponent<Rigidbody>();
     }
