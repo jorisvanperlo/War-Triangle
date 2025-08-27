@@ -16567,13 +16567,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.066753305, y: -0.82189167, z: 0.09848484, w: 0.5570806}
-  m_LocalPosition: {x: -172.4, y: 97, z: -90.3}
+  m_LocalRotation: {x: -0.108029075, y: -0.8873672, z: 0.26537904, w: -0.36122468}
+  m_LocalPosition: {x: -16.69, y: 78.3, z: 4.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 13.666, y: -111.741, z: 0}
+  m_LocalEulerAnglesHint: {x: 33.3, y: -224.3, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77419,13 +77419,16 @@ MonoBehaviour:
   planes:
   - {fileID: 3938649854225880481, guid: 75f13ce067c470a44bf0c8cac50ff102, type: 3}
   - {fileID: 389208595252743696, guid: f04f8b8cac6ac384ea7dc3ed83131ff2, type: 3}
+  - {fileID: 2946442289936818135, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
   planeSpawn:
   - {x: 0, y: 74.8, z: 0}
   - {x: 0, y: 73.6, z: 0}
+  - {x: 0, y: 75, z: 0}
   planeRot:
   - {x: -9.2, y: 0, z: 0}
   - {x: -12.4, y: 0, z: 0}
-  defaultPlane: 1
+  - {x: 0, y: 0, z: 0}
+  defaultPlane: 2
 --- !u!1001 &1878655470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -92344,6 +92347,79 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &448644660956354733
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -12.81
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 75
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1373647443076904813, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2946442289936818135, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_Name
+      value: 'Spitfire Mk 9 '
+      objectReference: {fileID: 0}
+    - target: {fileID: 2946442289936818135, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4035651663727862451, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: 'wingTrail.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1699678780293068058}
+    - target: {fileID: 4035651663727862451, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: 'wingTrail.Array.data[1]'
+      value: 
+      objectReference: {fileID: 893631955504338743}
+    - target: {fileID: 7074536256940295229, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
+      propertyPath: deathExplosion
+      value: 
+      objectReference: {fileID: 870296780}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed4a960a523cb8440a85e6d7f333f32b, type: 3}
 --- !u!4 &533528419117047545
 Transform:
   m_ObjectHideFlags: 0
@@ -92582,7 +92658,7 @@ Transform:
   m_GameObject: {fileID: 7597584054019065250}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -15.54, y: 75, z: -5.03}
+  m_LocalPosition: {x: -0.03, y: 75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -95074,7 +95150,7 @@ CapsuleCollider:
   m_Radius: 0.22
   m_Height: 1.61
   m_Direction: 1
-  m_Center: {x: -0.01, y: -0.88, z: 0.05}
+  m_Center: {x: 0.01, y: -0.88, z: 0.05}
 --- !u!23 &6489054569281148368
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -96822,3 +96898,4 @@ SceneRoots:
   - {fileID: 1201163717}
   - {fileID: 5176116858425990050}
   - {fileID: 784354105539463924}
+  - {fileID: 448644660956354733}
