@@ -20,6 +20,12 @@ public class LogoAnimation : MonoBehaviour
 
     private Vector3 originalCamPos;
     private bool isShaking = false;
+    private bool skipped = false;
+
+    private Vector3[] startPositions;
+    private Vector3[] endPositions;
+
+    private List<Coroutine> runningCoroutines = new List<Coroutine>();
 
     private void Start()
     {
@@ -27,68 +33,112 @@ public class LogoAnimation : MonoBehaviour
 
         if (mainCamera == null) mainCamera = Camera.main;
         originalCamPos = mainCamera.transform.localPosition;
-        StartCoroutine(ShakeWithLetterDrop());
+
+        // Cache positions
+        startPositions = new Vector3[letters.Length];
+        endPositions = new Vector3[letters.Length];
+        for (int i = 0; i < letters.Length; i++)
+        {
+            if (letters[i] == null) continue;
+            startPositions[i] = letters[i].transform.position;
+            endPositions[i] = startPositions[i] + Vector3.forward * moveDistance;
+        }
+
+        runningCoroutines.Add(StartCoroutine(ShakeWithLetterDrop()));
         mainUIHold.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (!skipped && Input.GetMouseButtonDown(0))
+        {
+            SkipAnimation();
+        }
     }
 
     private IEnumerator ShakeWithLetterDrop()
     {
-        List<Coroutine> moveCoroutines = new List<Coroutine>();
-
         for (int i = 0; i < letters.Length; i++)
         {
             if (letters[i] != null)
             {
-                Coroutine c = StartCoroutine(MoveLetterZ(letters[i].transform, i * staggerDelay));
-                moveCoroutines.Add(c);
+                runningCoroutines.Add(StartCoroutine(MoveLetterZ(i, i * staggerDelay)));
             }
         }
 
-        // Wait until the first letter lands
         yield return new WaitForSeconds(moveDuration);
+        if (skipped) yield break;
 
         isShaking = true;
-        StartCoroutine(ShakeCamera());
+        runningCoroutines.Add(StartCoroutine(ShakeCamera()));
 
-        // Wait until the last letter lands
         yield return new WaitForSeconds((letters.Length - 1) * staggerDelay + extraShakeTime);
+        if (skipped) yield break;
 
         isShaking = false;
         mainCamera.transform.localPosition = originalCamPos;
 
-
-        // turn on rest of the ui
         mainUIHold.SetActive(true);
         Cursor.visible = true;
     }
 
-    private IEnumerator MoveLetterZ(Transform letterTransform, float delay)
+    private IEnumerator MoveLetterZ(int index, float delay)
     {
         yield return new WaitForSeconds(delay);
+        if (skipped) yield break;
 
-        Vector3 startPos = letterTransform.position;
-        Vector3 endPos = startPos + Vector3.forward * moveDistance;
+        Transform t = letters[index].transform;
+        Vector3 start = startPositions[index];
+        Vector3 end = endPositions[index];
 
         float elapsed = 0f;
-        while (elapsed < moveDuration)
+        while (elapsed < moveDuration && !skipped)
         {
-            float t = elapsed / moveDuration;
-            letterTransform.position = Vector3.Lerp(startPos, endPos, t);
+            float tNorm = elapsed / moveDuration;
+            t.position = Vector3.Lerp(start, end, tNorm);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        letterTransform.position = endPos;
+        if (!skipped)
+            t.position = end;
     }
 
     private IEnumerator ShakeCamera()
     {
-        while (isShaking)
+        while (isShaking && !skipped)
         {
             Vector3 randomOffset = Random.insideUnitSphere * shakeMagnitude;
             mainCamera.transform.localPosition = originalCamPos + randomOffset;
             yield return null;
         }
     }
-}
 
+    private void SkipAnimation()
+    {
+        if (skipped) return;
+        skipped = true;
+
+        // Stop everything that was moving
+        foreach (var c in runningCoroutines)
+        {
+            if (c != null) StopCoroutine(c);
+        }
+        runningCoroutines.Clear();
+
+        // Reset camera
+        isShaking = false;
+        mainCamera.transform.localPosition = originalCamPos;
+
+        // Snap all letters to their final positions (no +=)
+        for (int i = 0; i < letters.Length; i++)
+        {
+            if (letters[i] != null)
+                letters[i].transform.position = endPositions[i];
+        }
+
+        // Show UI
+        mainUIHold.SetActive(true);
+        Cursor.visible = true;
+    }
+}

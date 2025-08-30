@@ -25,6 +25,12 @@ public class MenuCamController : MonoBehaviour
 
     public TextMeshProUGUI planeName;
 
+    public void Awake()
+    {
+        //Setresolution
+        Screen.SetResolution(398, 224, true);
+    }
+
     void Update()
     {
         if (canLookAround && !camMove && Input.GetMouseButton(0))

@@ -18,11 +18,6 @@ public class ButtonInteractions : MonoBehaviour
     public AudioSource menuMusic;
     public Scrollbar volumeSlider;
 
-    public Volume GV;
-    public bool CRTOn = true;
-    ChromaticAberration ChromaticAberration;
-    public Material ScanLines;
-
     public static int chosenPlane;
 
     public string sceneName;
@@ -81,18 +76,5 @@ public class ButtonInteractions : MonoBehaviour
     public void VolumeChange()
     {
         menuMusic.volume = volumeSlider.value;
-    }
-
-    public void ChangeCRTFilter()
-    {
-        CRTOn = !CRTOn;
-        if (CRTOn)
-        {
-            //ScanLines;
-        }
-        if (GV.profile.TryGet(out ChromaticAberration))
-        {
-            ChromaticAberration.intensity.value = 0.1f;
-        }
     }
 }

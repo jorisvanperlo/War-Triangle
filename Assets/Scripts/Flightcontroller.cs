@@ -50,11 +50,12 @@ public class Flightcontroller : MonoBehaviour
 
     // Engine Force
     [Foldout("Engine")]
-    public float enginePower_Hp, throttleIncrement = 30f;
+    public float enginePower_Hp, throttleIncrement = 30f, startAccelerationSpeed = 2f;
     [Foldout("Engine")]
     public float accelerationRate = 2f, decelerationRate = 3f;
 
     private float thrustForce, throttle, currentThrust, thrustReduceOverAngle = 1, glideMultiplier;
+    private float throttleUpTimer;
 
     // Aerodynamics
     [Foldout("Aerodynamics")]
@@ -96,7 +97,7 @@ public class Flightcontroller : MonoBehaviour
 
     // Animation Graphs
     [Foldout("Don't Change")]
-    public AnimationCurve dragOverAngle, thrustOverThrottle, glideOverAngle;
+    public AnimationCurve thrustOverAngle, thrustOverThrottle, glideOverAngle;
     [Foldout("Don't Change")]
     public PhysicsMaterial phyMat;
     [Foldout("Don't Change")]
@@ -421,7 +422,7 @@ public class Flightcontroller : MonoBehaviour
 
         // Get how much the object is looking "up" (dot with world up)
         lookUpAmount = Vector3.Dot(transform.forward.normalized, Vector3.up);
-        float thrustReduceLerp = dragOverAngle.Evaluate(lookUpAmount);
+        float thrustReduceLerp = thrustOverAngle.Evaluate(lookUpAmount);
         thrustReduceOverAngle = Mathf.Lerp(thrustReduceOverAngle, thrustReduceLerp, 0.15f * Time.deltaTime);
 
 

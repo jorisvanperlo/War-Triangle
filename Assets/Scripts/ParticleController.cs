@@ -21,14 +21,6 @@ public class ParticleController : MonoBehaviour
     {
         float rbSpeed = targetRigidbody.linearVelocity.magnitude;
 
-        foreach (ParticleSystem ps in FireEmitor)
-        {
-            if (ps != null)
-            {
-                var main = ps.main;
-                main.startSpeed = rbSpeed * speedMultiplier;
-            }
-        }
         float trailTime = Mathf.Clamp(rbSpeed * timeMultiplier, 0, 0.3f);
 
         foreach (TrailRenderer trail in wingTrail)

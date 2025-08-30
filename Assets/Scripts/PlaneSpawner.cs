@@ -12,11 +12,10 @@ public class PlaneSpawner : MonoBehaviour
     public int defaultPlane;
     void Start()
     {
-        //Setresolution
-        Screen.SetResolution(398, 224, true);
+        
 
         int index = ButtonInteractions.chosenPlane - 1;
-        if (index <= 0) { index = defaultPlane; }
+        if (index < 0) { index = defaultPlane; }
 
         curPlaneSpawn = planeSpawn[index];
         curPlaneRot = planeRot[index];
