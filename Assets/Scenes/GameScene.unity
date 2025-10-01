@@ -77890,7 +77890,7 @@ MonoBehaviour:
   - {x: -9.2, y: 0, z: 0}
   - {x: -12.4, y: 0, z: 0}
   - {x: -11.75, y: 0, z: 0}
-  defaultPlane: 0
+  defaultPlane: 1
 --- !u!114 &1878235767
 MonoBehaviour:
   m_ObjectHideFlags: 0
